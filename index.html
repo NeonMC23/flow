@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow – Music Player</title>
+    <link rel="stylesheet" href="src/css/style.css" />
+    <link rel="icon" href="src/icon/logo.png" />
+  </head>
+
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <h1>Flow</h1>
+        <p class="subtitle">Music Player</p>
+        <nav>
+          <a href="index.html#library">Library</a>
+          <a href="index.html#nowplaying">Now Playing</a>
+          <a href="upload.html">Upload</a>
+          <a>------------</a>
+          <a href="https://github.com/neonmc23/flow" target="_blank">GitHub</a>
+          <p class="subtitle" style="position: absolute; bottom: 0">Neon</p>
+        </nav>
+      </aside>
+
+      <main>
+        <div class="search-wrapper">
+          <div class="search-container">
+            <input
+              id="search"
+              class="search-bar"
+              type="text"
+              placeholder="Search..."
+            />
+            <img class="search-icon" src="src/icon/search.svg" alt="search" />
+            <div class="filter-container">
+              <img
+                class="filter-icon"
+                src="src/icon/filter.svg"
+                alt="filtrer"
+                onclick="toggleFilterMenu()"
+              />
+              <div class="filter-menu" id="filterMenu">
+                <div class="filters">
+                  <p>Artiste</p>
+                  <select id="artist-filter">
+                    <option value="">All</option>
+                  </select>
+                  <p>Album</p>
+                  <select id="album-filter">
+                    <option value="">All</option>
+                  </select>
+                </div>
+                <button onclick="applyFilters()">Apply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section id="nowplaying">
+          <canvas id="oscilloscope"></canvas>
+          <div class="nowplaying-container">
+            <h2>Now Playing</h2>
+            <div id="player">
+              <audio id="audio" controls></audio>
+              <p id="nowplaying-title">Select a track to play</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="library">
+          <h2>Library</h2>
+          <ul id="track-list"></ul>
+        </section>
+
+        <footer>
+          <p>© 2025 Flow • Open-source</p>
+        </footer>
+      </main>
+    </div>
+
+    <script src="src/javascript/filter.js"></script>
+    <script src="src/javascript/script.js"></script>
+    <script src="src/javascript/effect.js"></script>
+  </body>
+</html>

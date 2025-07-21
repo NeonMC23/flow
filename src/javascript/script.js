@@ -1,0 +1,64 @@
+const fileInput = document.getElementById("fileInput");
+const trackList = document.getElementById("track-list");
+const audio = document.getElementById("audio");
+const nowTitle = document.getElementById("nowplaying-title");
+
+// Ajout manuel de fichiers (upload)
+if (fileInput) {
+  fileInput.addEventListener("change", function () {
+    const files = Array.from(this.files);
+    files.forEach((file) => {
+      const url = URL.createObjectURL(file);
+      const li = document.createElement("li");
+      li.textContent = file.name;
+      li.onclick = () => {
+        audio.src = url;
+        audio.play();
+        nowTitle.textContent = file.name;
+      };
+      trackList.appendChild(li);
+    });
+  });
+}
+
+async function loadAlbums() {
+  try {
+    const albumsListRes = await fetch("src/data/album.json");
+    const albumFolders = await albumsListRes.json();
+
+    for (const albumName of albumFolders) {
+      try {
+        const res = await fetch(`src/data/album/${albumName}/infos.json`);
+        if (!res.ok) {
+          console.warn(`Album ${albumName} introuvable.`);
+          continue;
+        }
+        const albumInfo = await res.json();
+
+        albumInfo.tracks.forEach((track) => {
+          musicData.push({
+            title: track.title,
+            artist: albumInfo.artist,
+            album: albumInfo.title,
+            duration: track.duration,
+            cover: `src/data/album/${albumName}/${albumInfo.cover}`,
+            src: `src/data/album/${albumName}/${track.file}`,
+          });
+        });
+      } catch (err) {
+        console.error(`Erreur chargement album ${albumName}:`, err);
+      }
+    }
+
+    renderTracks(musicData);
+    generateFilterOptions(musicData);
+  } catch (err) {
+    console.error("Erreur chargement albums.json :", err);
+  }
+}
+
+// ⚠️ Important : musicData doit être global dans filter.js
+window.musicData = musicData;
+
+// Appelle la fonction au chargement de la page
+loadAlbums();
