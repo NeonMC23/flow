@@ -3,7 +3,7 @@ const trackList = document.getElementById("track-list");
 const audio = document.getElementById("audio");
 const nowTitle = document.getElementById("nowplaying-title");
 
-// Ajout manuel de fichiers (upload)
+// Manual file add (upload)
 if (fileInput) {
   fileInput.addEventListener("change", function () {
     const files = Array.from(this.files);
@@ -30,7 +30,7 @@ async function loadAlbums() {
       try {
         const res = await fetch(`src/data/album/${albumName}/infos.json`);
         if (!res.ok) {
-          console.warn(`Album ${albumName} introuvable.`);
+          console.warn(`Album ${albumName} not found.`);
           continue;
         }
         const albumInfo = await res.json();
@@ -46,19 +46,19 @@ async function loadAlbums() {
           });
         });
       } catch (err) {
-        console.error(`Erreur chargement album ${albumName}:`, err);
+        console.error(`Error loading album ${albumName}:`, err);
       }
     }
 
     renderTracks(musicData);
     generateFilterOptions(musicData);
   } catch (err) {
-    console.error("Erreur chargement albums.json :", err);
+    console.error("Error loading album list:", err);
   }
 }
 
-// ⚠️ Important : musicData doit être global dans filter.js
+// Keep musicData global for filter.js
 window.musicData = musicData;
 
-// Appelle la fonction au chargement de la page
+// Load albums on page load
 loadAlbums();

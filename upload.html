@@ -2,59 +2,63 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Upload Music – Flow</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Upload Music - Flow</title>
     <link rel="stylesheet" href="src/css/style.css" />
     <link rel="icon" href="src/icon/logo.png" />
   </head>
   <body>
-    <aside class="sidebar">
-      <h1>Flow</h1>
-      <p class="subtitle">Music Player</p>
-      <nav>
-        <a href="index.html#library">Library</a>
-        <a href="index.html#nowplaying">Now Playing</a>
-        <a href="upload.html" style="color: #ff66cc">Upload in DB</a>
-        <a>------------</a>
-        <a href="https://github.com/your-repo/flow" target="_blank">GitHub</a>
-        <p class="subtitle" style="position: absolute; bottom: 0">Neon</p>
-      </nav>
-    </aside>
+    <div class="bg-orbs">
+      <span class="orb orb-1"></span>
+      <span class="orb orb-2"></span>
+      <span class="orb orb-3"></span>
+      <span class="orb orb-4"></span>
+      <span class="orb orb-5"></span>
+      <span class="orb orb-6"></span>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>Flow</h1>
+          <p class="subtitle">Modern Player</p>
+        </div>
 
-    <main class="upload-container">
-      <h1>How to Add Music to the Flow Library</h1>
-      <p style="line-height: 1.7; max-width: 700px">
-        To add new albums or tracks to Flow, follow these steps:
-      </p>
+        <nav class="nav">
+          <a href="index.html#library" class="nav-link">Library</a>
+          <a href="upload.html" class="nav-link active">Upload</a>
+          <a href="settings.html" class="nav-link">Settings</a>
+          <div class="nav-divider"></div>
+          <a href="https://github.com/neonmc23/flow" target="_blank" class="nav-link">GitHub</a>
+        </nav>
 
-      <ol style="line-height: 1.7; max-width: 700px">
-        <li>
-          In your project folder, go to:
-          <code>src/data/album/</code>
-        </li>
+        <div class="sidebar-section">
+          <p class="section-title">Playlists</p>
+          <button class="pill">All Music</button>
+          <button class="pill">Favorites</button>
+          <button class="pill">Recent</button>
+        </div>
 
-        <li>
-          Create a new folder using your album name:
-          <br />
-          <code>src/data/album/your-album-name/</code>
-        </li>
+        <p class="sidebar-footer">Neon</p>
+      </aside>
 
-        <li>
-          Inside this folder, place all your audio tracks (<code>.mp3</code>,
-          <code>.wav</code>, etc.) and a cover image (e.g.
-          <code>cover.png</code>).
-        </li>
+      <main class="main">
+        <header class="topbar compact">
+          <div class="title-block">
+            <h2>Upload</h2>
+            <p>Keep the library tidy with a simple album-based structure.</p>
+          </div>
+        </header>
 
-        <li>
-          Create an <code>infos.json</code> file in that same folder, describing
-          the album and its tracks. Example:
-          <pre
-            style="
-              background: #111;
-              color: #ff66cc;
-              padding: 1em;
-              overflow-x: auto;
-            "
-          >
+        <section class="upload-guide">
+          <h3>How to add music</h3>
+          <ol class="steps">
+            <li>Go to <code>src/data/album/</code>.</li>
+            <li>Create a folder for your album: <code>src/data/album/your-album-name/</code>.</li>
+            <li>Add audio files and a cover image (for example <code>cover.png</code>).</li>
+            <li>Create an <code>infos.json</code> file in that folder with this structure:</li>
+          </ol>
+
+          <pre class="code-block">
 {
   "title": "Album Title",
   "artist": "Artist Name",
@@ -71,45 +75,26 @@
       "duration": "4:05"
     }
   ]
-}</pre
-          >
-        </li>
+}
+          </pre>
 
-        <li>
-          Then, open the file:
-          <code>src/data/album.json</code><br />
-          and add the name of your album folder to the array. Example:
-          <pre
-            style="
-              background: #111;
-              color: #ff66cc;
-              padding: 1em;
-              overflow-x: auto;
-            "
-          >
-[
+          <ol class="steps" start="5">
+            <li>Add your album folder name in <code>src/data/album.json</code>:</li>
+          </ol>
+
+          <pre class="code-block">[
   "chillwave-vol1",
   "ambient-beats",
-  "your-album-name" // <-- Add this line
-]
-          </pre>
-        </li>
+  "your-album-name"
+]</pre>
 
-        <li>
-          Save all files and refresh the Flow player. Your new music should now
-          be listed in the library!
-        </li>
-      </ol>
-
-      <p style="line-height: 1.7; max-width: 700px">
-        Need help or found a bug? You can open an issue or contribute via the
-        <a
-          href="https://github.com/your-repo/flow"
-          target="_blank"
-          style="color: #ff66cc"
-          >project’s GitHub</a
-        >.
-      </p>
-    </main>
+          <p class="upload-note">
+            Refresh the player and your album will appear in the library. If you want to share fixes or improvements,
+            open a pull request on GitHub.
+          </p>
+        </section>
+      </main>
+    </div>
+    <script src="src/javascript/settings.js"></script>
   </body>
 </html>

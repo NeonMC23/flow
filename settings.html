@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Settings - Flow</title>
+    <link rel="stylesheet" href="src/css/style.css" />
+    <link rel="icon" href="src/icon/logo.png" />
+  </head>
+  <body>
+    <div class="bg-orbs">
+      <span class="orb orb-1"></span>
+      <span class="orb orb-2"></span>
+      <span class="orb orb-3"></span>
+      <span class="orb orb-4"></span>
+      <span class="orb orb-5"></span>
+      <span class="orb orb-6"></span>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>Flow</h1>
+          <p class="subtitle">Modern Player</p>
+        </div>
+
+        <nav class="nav">
+          <a href="index.html#library" class="nav-link">Library</a>
+          <a href="upload.html" class="nav-link">Upload</a>
+          <a href="settings.html" class="nav-link active">Settings</a>
+          <div class="nav-divider"></div>
+          <a href="https://github.com/neonmc23/flow" target="_blank" class="nav-link">GitHub</a>
+        </nav>
+
+        <div class="sidebar-section">
+          <p class="section-title">Playlists</p>
+          <button class="pill">All Music</button>
+          <button class="pill">Favorites</button>
+          <button class="pill">Recent</button>
+        </div>
+
+        <p class="sidebar-footer">Neon</p>
+      </aside>
+
+      <main class="main">
+        <header class="topbar compact">
+          <div class="title-block">
+            <h2>Settings</h2>
+            <p>Personalize Flow. Settings will be saved to JSON soon.</p>
+          </div>
+        </header>
+
+        <section class="settings-grid">
+          <div class="setting-card">
+            <h3>Appearance</h3>
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Background orbs</p>
+                <span class="setting-sub">Animated blurred shapes in the background.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="setting-orbs" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Glass player</p>
+                <span class="setting-sub">Frosted look for the bottom player.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="setting-glass" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-card">
+            <h3>Playback</h3>
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Autoplay next</p>
+                <span class="setting-sub">Play the next track automatically.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="setting-autoplay" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Oscilloscope</p>
+                <span class="setting-sub">Show waveform in the player.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="setting-osc" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-card">
+            <h3>Data</h3>
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Save preferences</p>
+                <span class="setting-sub">Settings will be written to a JSON file later.</span>
+              </div>
+              <button class="control-btn" type="button">Open JSON</button>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Reset</p>
+                <span class="setting-sub">Restore defaults.</span>
+              </div>
+              <button class="control-btn" type="button">Reset</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="src/javascript/settings.js"></script>
+  </body>
+</html>
