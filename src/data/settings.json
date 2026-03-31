@@ -2,5 +2,9 @@
   "showOrbs": true,
   "glassPlayer": true,
   "autoplayNext": true,
-  "showOscilloscope": true
+  "showOscilloscope": true,
+  "oscHeight": 48,
+  "oscWidth": 100,
+  "oscFftSize": 4096,
+  "oscLineWidth": 1
 }

@@ -10,15 +10,15 @@ analyser.connect(audioCtx.destination);
 const canvas = document.getElementById("oscilloscope");
 const canvasCtx = canvas.getContext("2d");
 const orbs = Array.from(document.querySelectorAll(".orb"));
-const bufferLength = analyser.fftSize;
-const dataArray = new Uint8Array(bufferLength);
+let dataArray = new Uint8Array(analyser.fftSize);
 let smoothRms = 0;
 let gain = 1;
 
 function resizeOscilloscope() {
   const dpr = window.devicePixelRatio || 1;
+  const height = parseFloat(getComputedStyle(canvas).height) || 48;
   canvas.width = canvas.offsetWidth * dpr;
-  canvas.height = 48 * dpr;
+  canvas.height = height * dpr;
   canvasCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 resizeOscilloscope();
@@ -57,6 +57,9 @@ window.addEventListener("resize", initOrbs);
 function draw() {
   requestAnimationFrame(draw);
 
+  if (dataArray.length !== analyser.fftSize) {
+    dataArray = new Uint8Array(analyser.fftSize);
+  }
   analyser.getByteTimeDomainData(dataArray);
 
   canvasCtx.fillStyle = "rgba(6, 8, 12, 0.85)";
@@ -66,6 +69,7 @@ function draw() {
   canvasCtx.strokeStyle = "#e055b8";
   canvasCtx.beginPath();
 
+  const bufferLength = analyser.fftSize;
   const sliceWidth = canvas.width / bufferLength;
   let x = 0;
   let sum = 0;
@@ -115,3 +119,26 @@ function draw() {
 }
 
 draw();
+
+function applyOscSettings(settings) {
+  if (!settings) return;
+  const fft = parseInt(settings.oscFftSize, 10);
+  if (Number.isFinite(fft)) {
+    const clamped = Math.min(Math.max(fft, 256), 16384);
+    if (analyser.fftSize !== clamped) {
+      analyser.fftSize = clamped;
+    }
+  }
+  if (Number.isFinite(settings.oscLineWidth)) {
+    canvasCtx.lineWidth = settings.oscLineWidth;
+  }
+  resizeOscilloscope();
+}
+
+window.addEventListener("flow:settings", (e) => {
+  applyOscSettings(e.detail);
+});
+
+if (window.flowSettings) {
+  applyOscSettings(window.flowSettings);
+}

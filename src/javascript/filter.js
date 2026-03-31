@@ -532,11 +532,33 @@ function attachPlayerControls() {
       isSeeking = true;
       const pct = parseFloat(progress.value) / 100;
       audio.currentTime = pct * audio.duration;
+      if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
     });
     progress.addEventListener("change", () => {
       isSeeking = false;
+      if (!audio.paused) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          const update = () => {
+            if (isSeeking) return;
+            if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
+            if (progress && audio.duration) {
+              progress.value = ((audio.currentTime / audio.duration) * 100).toFixed(2);
+            }
+            if (!audio.paused) rafId = requestAnimationFrame(update);
+          };
+          update();
+        });
+      }
     });
   }
+
+  audio.addEventListener("seeking", () => {
+    if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
+  });
+  audio.addEventListener("seeked", () => {
+    if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
+  });
 
   audio.addEventListener("loadedmetadata", () => {
     if (duration) duration.textContent = formatTime(audio.duration);

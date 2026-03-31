@@ -101,21 +101,71 @@
           </div>
 
           <div class="setting-card">
+            <h3>Oscilloscope</h3>
+            <div class="setting-row range-row">
+              <div class="range-head">
+                <div>
+                  <p class="setting-title">Height</p>
+                  <span class="setting-sub">Waveform height in px.</span>
+                </div>
+                <span class="range-value" id="osc-height-value">48px</span>
+              </div>
+              <input id="setting-osc-height" type="range" min="32" max="90" value="48" />
+            </div>
+
+            <div class="setting-row range-row">
+              <div class="range-head">
+                <div>
+                  <p class="setting-title">Width</p>
+                  <span class="setting-sub">Waveform width (percentage).</span>
+                </div>
+                <span class="range-value" id="osc-width-value">100%</span>
+              </div>
+              <input id="setting-osc-width" type="range" min="60" max="100" value="100" />
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Duration</p>
+                <span class="setting-sub">Number of periods displayed.</span>
+              </div>
+              <select id="setting-osc-fft">
+                <option value="1024">Short</option>
+                <option value="2048">Medium</option>
+                <option value="4096" selected>Long</option>
+                <option value="8192">Very long</option>
+              </select>
+            </div>
+
+            <div class="setting-row range-row">
+              <div class="range-head">
+                <div>
+                  <p class="setting-title">Line width</p>
+                  <span class="setting-sub">Wave thickness.</span>
+                </div>
+                <span class="range-value" id="osc-line-value">1px</span>
+              </div>
+              <input id="setting-osc-line" type="range" min="0.5" max="2" step="0.1" value="1" />
+            </div>
+          </div>
+
+          <div class="setting-card">
             <h3>Data</h3>
             <div class="setting-row">
               <div>
                 <p class="setting-title">Save preferences</p>
-                <span class="setting-sub">Settings will be written to a JSON file later.</span>
+                <span class="setting-sub">Save current settings locally.</span>
               </div>
-              <button class="control-btn" type="button">Open JSON</button>
+              <button class="control-btn" id="save-settings" type="button">Save Settings</button>
             </div>
+            <p class="setting-status" id="save-status">Not saved yet.</p>
 
             <div class="setting-row">
               <div>
                 <p class="setting-title">Reset</p>
                 <span class="setting-sub">Restore defaults.</span>
               </div>
-              <button class="control-btn" type="button">Reset</button>
+              <button class="control-btn" id="reset-settings" type="button">Reset</button>
             </div>
           </div>
         </section>
