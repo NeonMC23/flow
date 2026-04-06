@@ -1,15 +1,7 @@
 {
   "updatedAt": 1775484797663,
   "favorites": [],
-  "queue": [
-    "src/data/album/poster_boy/poster_boy.m4a",
-    "src/data/album/trav/nonobyseathesea.mp3",
-    "src/data/album/bttg/experience.wav",
-    "src/data/album/trav/epic-sax.wav",
-    "src/data/album/bttg/experience-vocals.wav",
-    "src/data/album/bttg/backtotheground.mp3",
-    "src/data/album/bttg/is-this-love-120bpm-2p.wav"
-  ],
+  "queue": [],
   "recent": [],
   "lastTrack": "src/data/album/poster_boy/poster_boy.m4a",
   "lastTime": 36.11,
