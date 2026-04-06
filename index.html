@@ -58,21 +58,27 @@
                 placeholder="Search title, artist, album"
               />
               <img class="search-icon" src="src/icon/search.svg" alt="search" />
-              <button class="filter-trigger" type="button" onclick="toggleFilterMenu()">
+              <button id="toggle-filters" class="filter-trigger" type="button" aria-label="Toggle filters">
                 <img class="filter-icon" src="src/icon/filter.svg" alt="filter" />
               </button>
-              <div class="filter-menu" id="filterMenu">
-                <div class="filters">
-                  <p>Artist</p>
-                  <select id="artist-filter">
-                    <option value="">All</option>
-                  </select>
-                  <p>Album</p>
-                  <select id="album-filter">
-                    <option value="">All</option>
-                  </select>
-                </div>
-                <button onclick="applyFilters()">Apply</button>
+            </div>
+            <div class="filter-bar">
+              <div class="filter-group">
+                <label for="artist-filter">Artist</label>
+                <select id="artist-filter">
+                  <option value="">All</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="album-filter">Album</label>
+                <select id="album-filter">
+                  <option value="">All</option>
+                </select>
+              </div>
+              <button id="clear-filters" class="ghost-btn" type="button">Clear</button>
+              <div class="filter-status">
+                <span id="filter-count">0</span>
+                <span>active</span>
               </div>
             </div>
           </div>
@@ -152,6 +158,7 @@
       </main>
     </div>
 
+    <script src="src/javascript/state.js"></script>
     <script src="src/javascript/settings.js"></script>
     <script src="src/javascript/filter.js"></script>
     <script src="src/javascript/script.js"></script>

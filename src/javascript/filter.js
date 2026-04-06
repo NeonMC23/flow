@@ -15,7 +15,40 @@ document.addEventListener("click", function (e) {
 
 const searchInput = document.getElementById("search");
 if (searchInput) {
-  searchInput.addEventListener("input", applyFilters);
+  searchInput.addEventListener("input", () => {
+    saveFilterState();
+    applyFilters();
+  });
+}
+
+const clearFiltersBtn = document.getElementById("clear-filters");
+if (clearFiltersBtn) {
+  clearFiltersBtn.addEventListener("click", () => {
+    const artistFilter = document.getElementById("artist-filter");
+    const albumFilter = document.getElementById("album-filter");
+    const searchTerm = document.getElementById("search");
+    if (artistFilter) artistFilter.value = "";
+    if (albumFilter) albumFilter.value = "";
+    if (searchTerm) searchTerm.value = "";
+    saveFilterState();
+    applyFilters();
+  });
+}
+
+const filterBar = document.querySelector(".filter-bar");
+const toggleFiltersBtn = document.getElementById("toggle-filters");
+if (toggleFiltersBtn && filterBar) {
+  toggleFiltersBtn.addEventListener("click", () => {
+    filterBar.classList.toggle("is-collapsed");
+    const hidden = filterBar.classList.contains("is-collapsed");
+    toggleFiltersBtn.classList.toggle("active", hidden);
+    localStorage.setItem("flow-filters-collapsed", hidden ? "1" : "0");
+  });
+  const collapsed = localStorage.getItem("flow-filters-collapsed") === "1";
+  if (collapsed) {
+    filterBar.classList.add("is-collapsed");
+    toggleFiltersBtn.classList.add("active");
+  }
 }
 
 let musicData = [];
@@ -28,6 +61,117 @@ let favorites = new Set(JSON.parse(localStorage.getItem("flow-favorites") || "[]
 let recent = JSON.parse(localStorage.getItem("flow-recent") || "[]");
 let isSeeking = false;
 let rafId = null;
+let durationCache = JSON.parse(localStorage.getItem("flow-duration-cache") || "{}");
+let lastTrackSrc = localStorage.getItem("flow-last-track") || "";
+let lastTrackTime = parseFloat(localStorage.getItem("flow-last-time") || "0");
+let lastPlaylist = localStorage.getItem("flow-last-playlist") || "all";
+let storedQueue = JSON.parse(localStorage.getItem("flow-queue") || "[]");
+let storedSort = JSON.parse(localStorage.getItem("flow-sort") || "null");
+let storedFilters = JSON.parse(localStorage.getItem("flow-filters") || "{}");
+let storedVolume = parseFloat(localStorage.getItem("flow-volume") || "1");
+let stateUpdatedAt = parseInt(localStorage.getItem("flow-state-updated") || "0", 10);
+let stateSyncTimer = null;
+let stateApiAvailable = false;
+const STATE_API = "http://127.0.0.1:8001/api/state";
+
+if (storedSort && storedSort.key && storedSort.dir) {
+  currentSort = storedSort;
+}
+
+function getLocalStateSnapshot() {
+  return {
+    updatedAt: stateUpdatedAt || Date.now(),
+    favorites: [...favorites],
+    queue: queue.map((track) => track.src),
+    recent,
+    lastTrack: lastTrackSrc,
+    lastTime: lastTrackTime,
+    playlist: currentPlaylist,
+    sort: currentSort,
+    filters: storedFilters,
+    volume: storedVolume,
+  };
+}
+
+function applyStateSnapshot(state) {
+  if (!state || typeof state !== "object") return;
+  if (Array.isArray(state.favorites)) {
+    favorites = new Set(state.favorites);
+    localStorage.setItem("flow-favorites", JSON.stringify([...favorites]));
+  }
+  if (Array.isArray(state.queue)) {
+    storedQueue = state.queue;
+    localStorage.setItem("flow-queue", JSON.stringify(storedQueue));
+  }
+  if (Array.isArray(state.recent)) {
+    recent = state.recent;
+    localStorage.setItem("flow-recent", JSON.stringify(recent));
+  }
+  if (typeof state.lastTrack === "string") {
+    lastTrackSrc = state.lastTrack;
+    localStorage.setItem("flow-last-track", lastTrackSrc);
+  }
+  if (Number.isFinite(state.lastTime)) {
+    lastTrackTime = state.lastTime;
+    localStorage.setItem("flow-last-time", state.lastTime.toString());
+  }
+  if (typeof state.playlist === "string") {
+    lastPlaylist = state.playlist;
+    localStorage.setItem("flow-last-playlist", lastPlaylist);
+  }
+  if (state.sort && state.sort.key && state.sort.dir) {
+    currentSort = state.sort;
+    localStorage.setItem("flow-sort", JSON.stringify(currentSort));
+  }
+  if (state.filters && typeof state.filters === "object") {
+    storedFilters = state.filters;
+    localStorage.setItem("flow-filters", JSON.stringify(storedFilters));
+  }
+  if (Number.isFinite(state.volume)) {
+    storedVolume = state.volume;
+    localStorage.setItem("flow-volume", storedVolume.toString());
+  }
+  if (Number.isFinite(state.updatedAt)) {
+    stateUpdatedAt = state.updatedAt;
+    localStorage.setItem("flow-state-updated", stateUpdatedAt.toString());
+  }
+}
+
+function scheduleStateSync() {
+  if (!stateApiAvailable) return;
+  if (stateSyncTimer) clearTimeout(stateSyncTimer);
+  stateSyncTimer = setTimeout(async () => {
+    const payload = getLocalStateSnapshot();
+    payload.updatedAt = Date.now();
+    stateUpdatedAt = payload.updatedAt;
+    localStorage.setItem("flow-state-updated", stateUpdatedAt.toString());
+    try {
+      await fetch(STATE_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.warn("State sync failed.", err);
+    }
+  }, 700);
+}
+
+window.flowStateReady = fetch(STATE_API)
+  .then((res) => res.json())
+  .then((data) => {
+    stateApiAvailable = true;
+    const remote = data?.state || {};
+    const remoteUpdated = parseInt(remote.updatedAt || "0", 10);
+    if (remoteUpdated > stateUpdatedAt) {
+      applyStateSnapshot(remote);
+    } else {
+      scheduleStateSync();
+    }
+  })
+  .catch(() => {
+    stateApiAvailable = false;
+  });
 
 function updateMarquee(nowTitle) {
   const marquee = nowTitle?.querySelector(".title-marquee");
@@ -84,6 +228,15 @@ function generateFilterOptions(tracks) {
     option.value = album;
     option.textContent = album;
     albumSelect.appendChild(option);
+  });
+
+  artistSelect.addEventListener("change", () => {
+    saveFilterState();
+    applyFilters();
+  });
+  albumSelect.addEventListener("change", () => {
+    saveFilterState();
+    applyFilters();
   });
 }
 
@@ -157,6 +310,22 @@ function applyFilters() {
   });
 
   renderTracks(filtered);
+  updateFilterStatus();
+}
+
+function updateFilterStatus() {
+  const status = document.getElementById("filter-count");
+  const wrapper = document.querySelector(".filter-status");
+  if (!status || !wrapper) return;
+  const artist = document.getElementById("artist-filter")?.value || "";
+  const album = document.getElementById("album-filter")?.value || "";
+  const search = document.getElementById("search")?.value || "";
+  let count = 0;
+  if (artist) count += 1;
+  if (album) count += 1;
+  if (search.trim()) count += 1;
+  status.textContent = count.toString();
+  wrapper.classList.toggle("is-active", count > 0);
 }
 
 function updateStats(tracks) {
@@ -172,6 +341,71 @@ function updateStats(tracks) {
   trackCount.textContent = tracks.length.toString();
   artistCount.textContent = artists.size.toString();
   albumCount.textContent = albums.size.toString();
+}
+
+function saveDurationCache() {
+  localStorage.setItem("flow-duration-cache", JSON.stringify(durationCache));
+}
+
+function saveQueueState() {
+  storedQueue = queue.map((q) => q.src);
+  localStorage.setItem("flow-queue", JSON.stringify(storedQueue));
+}
+
+function saveFilterState() {
+  const artistFilter = document.getElementById("artist-filter");
+  const albumFilter = document.getElementById("album-filter");
+  const searchTerm = document.getElementById("search");
+  const payload = {
+    artist: artistFilter?.value || "",
+    album: albumFilter?.value || "",
+    search: searchTerm?.value || "",
+  };
+  localStorage.setItem("flow-filters", JSON.stringify(payload));
+  storedFilters = payload;
+  scheduleStateSync();
+}
+
+function setNowPlaying(track) {
+  const nowTitle = document.getElementById("nowplaying-title");
+  const cover = document.getElementById("player-cover");
+  if (nowTitle) {
+    const marquee = nowTitle.querySelector(".title-marquee");
+    const text = `${track.title} - ${track.artist}`;
+    if (marquee) {
+      marquee.textContent = text;
+      scheduleMarqueeUpdate();
+    } else {
+      nowTitle.textContent = text;
+    }
+  }
+  if (cover) {
+    cover.src = track.cover;
+    cover.alt = `${track.album} cover`;
+  }
+}
+
+function ensureDuration(track) {
+  if (!track?.src) return;
+  if (durationCache[track.src]) return;
+
+  const audio = new Audio();
+  audio.preload = "metadata";
+  audio.src = track.src;
+  audio.addEventListener("loadedmetadata", () => {
+    const seconds = audio.duration;
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    const formatted = `${mins}:${secs.toString().padStart(2, "0")}`;
+    durationCache[track.src] = formatted;
+    saveDurationCache();
+    const row = document.querySelector(`.track-row[data-src=\"${track.src}\"] .cell.time`);
+    if (row) row.textContent = formatted;
+  });
+  audio.addEventListener("error", () => {
+    durationCache[track.src] = track.duration || "0:00";
+    saveDurationCache();
+  });
 }
 
 function updateSortUI() {
@@ -192,6 +426,8 @@ function setSort(key) {
     currentSort.key = key;
     currentSort.dir = "asc";
   }
+  localStorage.setItem("flow-sort", JSON.stringify(currentSort));
+  scheduleStateSync();
   applyFilters();
   updateSortUI();
 }
@@ -204,27 +440,20 @@ function playTrack(track, index) {
 
   if (!audio) return;
 
-  audio.src = track.src;
-  audio.play();
+  audio.src = encodeURI(track.src);
+  localStorage.setItem("flow-last-track", track.src);
+  localStorage.setItem("flow-last-time", "0");
+  lastTrackTime = 0;
+  lastTrackSrc = track.src;
+  scheduleStateSync();
+  audio.play().catch(() => {});
   if (playBtn) {
     playBtn.textContent = "Pause";
   }
-  if (nowTitle) {
-    const marquee = nowTitle.querySelector(".title-marquee");
-    const text = `${track.title} - ${track.artist}`;
-    if (marquee) {
-      marquee.textContent = text;
-      scheduleMarqueeUpdate();
-    } else {
-      nowTitle.textContent = text;
-    }
-  }
-  if (cover) {
-    cover.src = track.cover;
-    cover.alt = `${track.album} cover`;
-  }
+  setNowPlaying(track);
   recent = [track.src, ...recent.filter((src) => src !== track.src)].slice(0, 30);
   localStorage.setItem("flow-recent", JSON.stringify(recent));
+  scheduleStateSync();
   currentIndex = index ?? currentTracks.findIndex((t) => t.src === track.src);
   document.querySelectorAll(".track-row").forEach((row) => {
     row.classList.toggle("active", row.dataset.src === track.src);
@@ -255,11 +484,15 @@ function playPrev() {
 function addToQueue(track) {
   queue.push(track);
   renderQueue();
+  saveQueueState();
+  scheduleStateSync();
 }
 
 function removeFromQueue(index) {
   queue.splice(index, 1);
   renderQueue();
+  saveQueueState();
+  scheduleStateSync();
 }
 
 function moveQueueItem(fromIndex, toIndex) {
@@ -267,6 +500,8 @@ function moveQueueItem(fromIndex, toIndex) {
   const [item] = queue.splice(fromIndex, 1);
   queue.splice(toIndex, 0, item);
   renderQueue();
+  saveQueueState();
+  scheduleStateSync();
 }
 
 function renderQueue() {
@@ -352,7 +587,7 @@ function renderTracks(tracks) {
       </div>
       <div class="cell artist">${track.artist}</div>
       <div class="cell album">${track.album}</div>
-      <div class="cell time">${track.duration}</div>
+      <div class="cell time">${durationCache[track.src] || track.duration}</div>
     `;
 
     li.querySelector(".fav-btn").addEventListener("click", (e) => {
@@ -363,6 +598,7 @@ function renderTracks(tracks) {
         favorites.add(track.src);
       }
       localStorage.setItem("flow-favorites", JSON.stringify([...favorites]));
+      scheduleStateSync();
       applyFilters();
     });
 
@@ -377,6 +613,7 @@ function renderTracks(tracks) {
     };
 
     trackList.appendChild(li);
+    ensureDuration(track);
   });
 
   const audio = document.getElementById("audio");
@@ -402,6 +639,8 @@ function attachPlaylistHandlers() {
   document.querySelectorAll(".playlist-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       currentPlaylist = btn.dataset.playlist || "all";
+      localStorage.setItem("flow-last-playlist", currentPlaylist);
+      scheduleStateSync();
       document
         .querySelectorAll(".playlist-btn")
         .forEach((button) => button.classList.remove("active"));
@@ -417,6 +656,8 @@ function attachQueueHandlers() {
     clearBtn.addEventListener("click", () => {
       queue = [];
       renderQueue();
+      saveQueueState();
+      scheduleStateSync();
     });
   }
   const queueList = document.getElementById("queue-list");
@@ -524,15 +765,26 @@ function attachPlayerControls() {
   if (volume) {
     volume.addEventListener("input", () => {
       audio.volume = parseFloat(volume.value);
+      localStorage.setItem("flow-volume", volume.value);
+      storedVolume = parseFloat(volume.value);
+      scheduleStateSync();
     });
+  }
+
+  if (Number.isFinite(storedVolume)) {
+    const safeVolume = Math.min(1, Math.max(0, storedVolume));
+    audio.volume = safeVolume;
+    if (volume) volume.value = safeVolume.toString();
   }
 
   if (progress) {
     progress.addEventListener("input", () => {
       isSeeking = true;
       const pct = parseFloat(progress.value) / 100;
-      audio.currentTime = pct * audio.duration;
-      if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
+        audio.currentTime = pct * audio.duration;
+        if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
+      }
     });
     progress.addEventListener("change", () => {
       isSeeking = false;
@@ -542,7 +794,7 @@ function attachPlayerControls() {
           const update = () => {
             if (isSeeking) return;
             if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
-            if (progress && audio.duration) {
+            if (progress && Number.isFinite(audio.duration) && audio.duration > 0) {
               progress.value = ((audio.currentTime / audio.duration) * 100).toFixed(2);
             }
             if (!audio.paused) rafId = requestAnimationFrame(update);
@@ -562,12 +814,50 @@ function attachPlayerControls() {
 
   audio.addEventListener("loadedmetadata", () => {
     if (duration) duration.textContent = formatTime(audio.duration);
+    if (audio.src && lastTrackSrc && audio.src.endsWith(lastTrackSrc) && lastTrackTime > 0) {
+      const safeTime = Math.min(lastTrackTime, Math.max(0, audio.duration - 0.5));
+      if (Number.isFinite(safeTime) && safeTime > 0) {
+        audio.currentTime = safeTime;
+        if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
+        if (progress && Number.isFinite(audio.duration) && audio.duration > 0) {
+          progress.value = ((audio.currentTime / audio.duration) * 100).toFixed(2);
+        }
+      }
+    }
+  });
+
+  audio.addEventListener("error", () => {
+    if (playBtn) playBtn.textContent = "Play";
+    if (currentTime) currentTime.textContent = "0:00";
+    if (duration) duration.textContent = "0:00";
+    const nowTitle = document.getElementById("nowplaying-title");
+    if (nowTitle) nowTitle.textContent = "Missing audio file";
+  });
+
+  let lastTimeSave = 0;
+  const persistTime = () => {
+    if (!audio.src) return;
+    const now = Date.now();
+    if (now - lastTimeSave < 900) return;
+    if (Number.isFinite(audio.currentTime)) {
+      localStorage.setItem("flow-last-time", audio.currentTime.toFixed(2));
+      lastTrackTime = audio.currentTime;
+      lastTimeSave = now;
+    }
+  };
+  audio.addEventListener("timeupdate", persistTime);
+  audio.addEventListener("pause", persistTime);
+  audio.addEventListener("seeking", persistTime);
+  audio.addEventListener("ended", () => {
+    localStorage.setItem("flow-last-time", "0");
+    lastTrackTime = 0;
+    scheduleStateSync();
   });
 
   const updateProgress = () => {
     if (isSeeking) return;
     if (currentTime) currentTime.textContent = formatTime(audio.currentTime);
-    if (progress && audio.duration) {
+    if (progress && Number.isFinite(audio.duration) && audio.duration > 0) {
       progress.value = ((audio.currentTime / audio.duration) * 100).toFixed(2);
     }
     if (!audio.paused) {
@@ -583,8 +873,61 @@ function attachPlayerControls() {
   audio.addEventListener("pause", () => {
     if (playBtn) playBtn.textContent = "Play";
     if (rafId) cancelAnimationFrame(rafId);
+    scheduleStateSync();
   });
 }
+
+function restoreFlowState() {
+  const audio = document.getElementById("audio");
+  const playBtn = document.getElementById("play-btn");
+  const artistFilter = document.getElementById("artist-filter");
+  const albumFilter = document.getElementById("album-filter");
+  const searchTerm = document.getElementById("search");
+
+  if (lastPlaylist) {
+    currentPlaylist = lastPlaylist;
+    document.querySelectorAll(".playlist-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.playlist === currentPlaylist);
+    });
+  }
+
+  if (storedFilters && typeof storedFilters === "object") {
+    if (searchTerm && typeof storedFilters.search === "string") {
+      searchTerm.value = storedFilters.search;
+    }
+    if (artistFilter && typeof storedFilters.artist === "string") {
+      artistFilter.value = storedFilters.artist;
+    }
+    if (albumFilter && typeof storedFilters.album === "string") {
+      albumFilter.value = storedFilters.album;
+    }
+  }
+
+  if (audio && lastTrackSrc) {
+    const track = musicData.find((t) => t.src === lastTrackSrc);
+    if (track) {
+      audio.src = encodeURI(track.src);
+      setNowPlaying(track);
+      if (playBtn) playBtn.textContent = "Play";
+    }
+  }
+
+  if (Array.isArray(storedQueue) && storedQueue.length) {
+    queue = storedQueue
+      .map((src) => musicData.find((track) => track.src === src))
+      .filter(Boolean);
+  }
+
+  applyFilters();
+  updateSortUI();
+  renderQueue();
+
+  if (audio && lastTrackSrc) {
+    currentIndex = currentTracks.findIndex((t) => t.src === lastTrackSrc);
+  }
+}
+
+window.restoreFlowState = restoreFlowState;
 
 attachSortHandlers();
 attachPlaylistHandlers();

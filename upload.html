@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Upload Music - Flow</title>
+    <title>Upload - Flow</title>
     <link rel="stylesheet" href="src/css/style.css" />
     <link rel="icon" href="src/icon/logo.png" />
   </head>
@@ -44,57 +44,113 @@
       <main class="main">
         <header class="topbar compact">
           <div class="title-block">
-            <h2>Upload</h2>
-            <p>Keep the library tidy with a simple album-based structure.</p>
+            <h2>Upload Manager</h2>
+            <p>Search and edit your library. Add albums and tracks offline.</p>
           </div>
         </header>
 
-        <section class="upload-guide">
-          <h3>How to add music</h3>
-          <ol class="steps">
-            <li>Go to <code>src/data/album/</code>.</li>
-            <li>Create a folder for your album: <code>src/data/album/your-album-name/</code>.</li>
-            <li>Add audio files and a cover image (for example <code>cover.png</code>).</li>
-            <li>Create an <code>infos.json</code> file in that folder with this structure:</li>
-          </ol>
+        <section class="upload-shell">
+          <div class="upload-toolbar">
+            <div class="search-stack">
+              <input id="library-search" type="search" placeholder="Search artist, album, track..." />
+              <span id="library-status">Server: offline</span>
+            </div>
+            <div class="toolbar-actions">
+              <button id="add-artist" class="control-btn">Add artist</button>
+            </div>
+          </div>
 
-          <pre class="code-block">
-{
-  "title": "Album Title",
-  "artist": "Artist Name",
-  "cover": "cover.png",
-  "tracks": [
-    {
-      "title": "Track One",
-      "file": "track1.mp3",
-      "duration": "3:21"
-    },
-    {
-      "title": "Track Two",
-      "file": "track2.mp3",
-      "duration": "4:05"
-    }
-  ]
-}
-          </pre>
+          <div class="upload-grid">
+            <section class="upload-card">
+              <div class="upload-header">
+                <h3>Library Tree</h3>
+                <p>Click artists to expand albums, click albums to view tracks.</p>
+              </div>
+              <div id="library-tree" class="library-tree"></div>
+            </section>
 
-          <ol class="steps" start="5">
-            <li>Add your album folder name in <code>src/data/album.json</code>:</li>
-          </ol>
+            <section class="upload-card">
+              <div class="upload-header">
+                <h3>Edit Panel</h3>
+                <p id="edit-subtitle">Select an artist, album, or track to edit.</p>
+              </div>
+              <div id="edit-panel" class="edit-panel">
+                <div class="edit-section hidden" id="edit-artist">
+                  <h4>Artist</h4>
+                  <label>
+                    Rename artist
+                    <input id="edit-artist-name" type="text" placeholder="Artist name" />
+                  </label>
+                  <div class="edit-actions">
+                    <button id="save-artist" class="control-btn">Save artist</button>
+                    <button id="delete-artist" class="danger-btn">Delete artist</button>
+                  </div>
+                  <div class="divider"></div>
+                  <label>
+                    New album title
+                    <input id="new-album-title" type="text" placeholder="Album title" />
+                  </label>
+                  <label>
+                    Cover image
+                    <input id="new-album-cover" type="file" accept="image/*" />
+                  </label>
+                  <button id="add-album" class="control-btn primary">Add album to artist</button>
+                </div>
 
-          <pre class="code-block">[
-  "chillwave-vol1",
-  "ambient-beats",
-  "your-album-name"
-]</pre>
+                <div class="edit-section hidden" id="edit-album">
+                  <h4>Album</h4>
+                  <label>
+                    Rename album
+                    <input id="edit-album-title" type="text" placeholder="Album title" />
+                  </label>
+                  <div class="edit-actions">
+                    <button id="save-album" class="control-btn">Save album</button>
+                    <button id="delete-album" class="danger-btn">Delete album</button>
+                  </div>
+                  <div class="divider"></div>
+                  <label>
+                    Change cover
+                    <input id="edit-album-cover" type="file" accept="image/*" />
+                  </label>
+                  <button id="save-album-cover" class="control-btn">Update cover</button>
+                  <div class="divider"></div>
+                  <label>
+                    Add tracks
+                    <input id="album-track-input" type="file" accept="audio/*" multiple />
+                  </label>
+                  <div id="track-editor" class="track-editor"></div>
+                  <button id="upload-tracks" class="control-btn primary">Upload tracks</button>
+                  <p id="upload-status">Ready.</p>
+                </div>
 
-          <p class="upload-note">
-            Refresh the player and your album will appear in the library. If you want to share fixes or improvements,
-            open a pull request on GitHub.
-          </p>
+                <div class="edit-section hidden" id="edit-track">
+                  <h4>Track</h4>
+                  <label>
+                    Rename track
+                    <input id="edit-track-title" type="text" placeholder="Track title" />
+                  </label>
+                  <div class="edit-actions">
+                    <button id="save-track" class="control-btn">Save track</button>
+                    <button id="delete-track" class="danger-btn">Delete track</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section class="upload-card">
+            <div class="upload-header">
+              <h3>Run local server</h3>
+              <p>Use <code>start.py</code> to launch both servers.</p>
+            </div>
+            <pre class="code-block">python start.py</pre>
+          </section>
         </section>
       </main>
     </div>
+
+    <script src="src/javascript/state.js"></script>
     <script src="src/javascript/settings.js"></script>
+    <script src="src/javascript/upload.js"></script>
   </body>
 </html>

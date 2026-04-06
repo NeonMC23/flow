@@ -51,6 +51,94 @@
 
         <section class="settings-grid">
           <div class="setting-card">
+            <h3>Theme</h3>
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Preset</p>
+                <span class="setting-sub">Quick theme packs.</span>
+              </div>
+              <select id="setting-theme-preset">
+                <option value="">Custom</option>
+                <option value="dark-pink">Dark Pink</option>
+                <option value="blue-neon">Blue Neon</option>
+                <option value="sunset">Sunset</option>
+                <option value="forest">Forest</option>
+                <option value="mono">Mono</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Random theme</p>
+                <span class="setting-sub">Generate a fresh palette.</span>
+              </div>
+              <button class="control-btn" id="random-theme" type="button">Random</button>
+            </div>
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Primary accent</p>
+                <span class="setting-sub">Main highlight color.</span>
+              </div>
+              <input type="color" id="setting-accent" />
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Secondary accent</p>
+                <span class="setting-sub">Glow and gradients.</span>
+              </div>
+              <input type="color" id="setting-accent-2" />
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Background</p>
+                <span class="setting-sub">Main app background.</span>
+              </div>
+              <input type="color" id="setting-bg" />
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Soft background</p>
+                <span class="setting-sub">Panels and cards.</span>
+              </div>
+              <input type="color" id="setting-bg-soft" />
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Elevated background</p>
+                <span class="setting-sub">Raised surfaces.</span>
+              </div>
+              <input type="color" id="setting-bg-elev" />
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Sidebar</p>
+                <span class="setting-sub">Left navigation panel.</span>
+              </div>
+              <input type="color" id="setting-sidebar" />
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Text</p>
+                <span class="setting-sub">Primary text color.</span>
+              </div>
+              <input type="color" id="setting-text" />
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Muted text</p>
+                <span class="setting-sub">Secondary labels.</span>
+              </div>
+              <input type="color" id="setting-muted" />
+            </div>
+          </div>
+
+          <div class="setting-card">
             <h3>Appearance</h3>
             <div class="setting-row">
               <div>
@@ -73,10 +161,8 @@
                 <span class="slider"></span>
               </label>
             </div>
-          </div>
 
-          <div class="setting-card">
-            <h3>Playback</h3>
+            <h3 style="margin-top: 10%;">Playback</h3>
             <div class="setting-row">
               <div>
                 <p class="setting-title">Autoplay next</p>
@@ -102,6 +188,13 @@
 
           <div class="setting-card">
             <h3>Oscilloscope</h3>
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Line color</p>
+                <span class="setting-sub">Waveform stroke color.</span>
+              </div>
+              <input type="color" id="setting-osc-color" />
+            </div>
             <div class="setting-row range-row">
               <div class="range-head">
                 <div>
@@ -130,6 +223,7 @@
                 <span class="setting-sub">Number of periods displayed.</span>
               </div>
               <select id="setting-osc-fft">
+                <option value="512">Very short</option>
                 <option value="1024">Short</option>
                 <option value="2048">Medium</option>
                 <option value="4096" selected>Long</option>
@@ -167,10 +261,18 @@
               </div>
               <button class="control-btn" id="reset-settings" type="button">Reset</button>
             </div>
+            <div class="setting-row">
+              <div>
+                <p class="setting-title">Reset local storage</p>
+                <span class="setting-sub">Use current file/server settings.</span>
+              </div>
+              <button class="control-btn" id="reset-local" type="button">Reset local</button>
+            </div>
           </div>
         </section>
       </main>
     </div>
+    <script src="src/javascript/state.js"></script>
     <script src="src/javascript/settings.js"></script>
   </body>
 </html>

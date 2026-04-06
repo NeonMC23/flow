@@ -1,11 +1,11 @@
 {
   "title": "poster boy",
   "artist": "2hollis",
-  "cover": "cover/poster_boy.jpg",
+  "cover": "poster_boy.jpg",
   "tracks": [
     {
       "title": "poster boy",
-      "file": "musics/poster_boy.m4a",
+      "file": "poster_boy.m4a",
       "duration": "2:01"
     }
   ]

@@ -1,16 +1,15 @@
 const audioElement = document.getElementById("audio");
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const analyser = audioCtx.createAnalyser();
-analyser.fftSize = 4096;
-
-const source = audioCtx.createMediaElementSource(audioElement);
-source.connect(analyser);
-analyser.connect(audioCtx.destination);
+let audioCtx = null;
+let analyser = null;
+let source = null;
+let desiredFftSize = 4096;
+let desiredLineWidth = 1;
+let desiredOscColor = "#ff66cc";
 
 const canvas = document.getElementById("oscilloscope");
 const canvasCtx = canvas.getContext("2d");
 const orbs = Array.from(document.querySelectorAll(".orb"));
-let dataArray = new Uint8Array(analyser.fftSize);
+let dataArray = new Uint8Array(desiredFftSize);
 let smoothRms = 0;
 let gain = 1;
 
@@ -24,10 +23,27 @@ function resizeOscilloscope() {
 resizeOscilloscope();
 window.addEventListener("resize", resizeOscilloscope);
 
-audioElement.addEventListener("play", () => {
+function ensureAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = desiredFftSize;
+    source = audioCtx.createMediaElementSource(audioElement);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    canvasCtx.lineWidth = desiredLineWidth;
+  }
   if (audioCtx.state !== "running") {
     audioCtx.resume();
   }
+}
+
+audioElement.addEventListener("play", () => {
+  ensureAudioContext();
+});
+
+document.addEventListener("pointerdown", () => {
+  ensureAudioContext();
 });
 
 function initOrbs() {
@@ -57,6 +73,18 @@ window.addEventListener("resize", initOrbs);
 function draw() {
   requestAnimationFrame(draw);
 
+  if (!analyser) {
+    canvasCtx.fillStyle = "rgba(6, 8, 12, 0.85)";
+    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+    canvasCtx.lineWidth = desiredLineWidth;
+    canvasCtx.strokeStyle = desiredOscColor;
+    canvasCtx.beginPath();
+    canvasCtx.moveTo(0, canvas.height / 2);
+    canvasCtx.lineTo(canvas.width, canvas.height / 2);
+    canvasCtx.stroke();
+    return;
+  }
+
   if (dataArray.length !== analyser.fftSize) {
     dataArray = new Uint8Array(analyser.fftSize);
   }
@@ -66,7 +94,7 @@ function draw() {
   canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
   canvasCtx.lineWidth = 1;
-  canvasCtx.strokeStyle = "#e055b8";
+  canvasCtx.strokeStyle = desiredOscColor;
   canvasCtx.beginPath();
 
   const bufferLength = analyser.fftSize;
@@ -125,12 +153,17 @@ function applyOscSettings(settings) {
   const fft = parseInt(settings.oscFftSize, 10);
   if (Number.isFinite(fft)) {
     const clamped = Math.min(Math.max(fft, 256), 16384);
-    if (analyser.fftSize !== clamped) {
+    desiredFftSize = clamped;
+    if (analyser && analyser.fftSize !== clamped) {
       analyser.fftSize = clamped;
     }
   }
   if (Number.isFinite(settings.oscLineWidth)) {
+    desiredLineWidth = settings.oscLineWidth;
     canvasCtx.lineWidth = settings.oscLineWidth;
+  }
+  if (settings.oscColor) {
+    desiredOscColor = settings.oscColor;
   }
   resizeOscilloscope();
 }

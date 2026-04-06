@@ -3,8 +3,19 @@
   "glassPlayer": true,
   "autoplayNext": true,
   "showOscilloscope": true,
+  "themePreset": "dark-pink",
+  "oscColor": "#ff66cc",
+  "accent": "#ff66cc",
+  "accent2": "#ff9ee2",
+  "bg": "#0b0c10",
+  "bgSoft": "#12141b",
+  "bgElev": "#181c25",
+  "sidebar": "#0f131a",
+  "text": "#e6e8ef",
+  "muted": "#a6adbb",
   "oscHeight": 48,
   "oscWidth": 100,
   "oscFftSize": 4096,
-  "oscLineWidth": 1
+  "oscLineWidth": 1,
+  "updatedAt": 1775484599549
 }

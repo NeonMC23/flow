@@ -23,12 +23,17 @@ if (fileInput) {
 
 async function loadAlbums() {
   try {
-    const albumsListRes = await fetch("src/data/album.json");
+    const albumsListRes = await fetch(`src/data/album.json?v=${Date.now()}`, {
+      cache: "no-store",
+    });
     const albumFolders = await albumsListRes.json();
 
     for (const albumName of albumFolders) {
       try {
-        const res = await fetch(`src/data/album/${albumName}/infos.json`);
+        const res = await fetch(
+          `src/data/album/${albumName}/infos.json?v=${Date.now()}`,
+          { cache: "no-store" }
+        );
         if (!res.ok) {
           console.warn(`Album ${albumName} not found.`);
           continue;
@@ -36,13 +41,16 @@ async function loadAlbums() {
         const albumInfo = await res.json();
 
         albumInfo.tracks.forEach((track) => {
+          const cover = albumInfo.cover
+            ? `src/data/album/${albumName}/${albumInfo.cover}`
+            : "src/icon/logo.png";
           musicData.push({
             title: track.title,
             artist: albumInfo.artist,
             album: albumInfo.title,
             duration: track.duration,
-            cover: `src/data/album/${albumName}/${albumInfo.cover}`,
-            src: `src/data/album/${albumName}/${track.file}`,
+            cover,
+            src: encodeURI(`src/data/album/${albumName}/${track.file}`),
           });
         });
       } catch (err) {
@@ -52,6 +60,16 @@ async function loadAlbums() {
 
     renderTracks(musicData);
     generateFilterOptions(musicData);
+    if (window.flowStateReady) {
+      try {
+        await window.flowStateReady;
+      } catch (err) {
+        console.warn("State sync unavailable.", err);
+      }
+    }
+    if (typeof window.restoreFlowState === "function") {
+      window.restoreFlowState();
+    }
   } catch (err) {
     console.error("Error loading album list:", err);
   }
